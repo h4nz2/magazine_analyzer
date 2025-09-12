@@ -31,4 +31,5 @@ ruby label_articles.rb magazines/trnshlvtc01_articles/
 Feel free to open issues or submit pull requests for improvements or new features.
 
 ## License
-Specify your license here (e.g., MIT, GPL, etc.)
+
+MIT license
