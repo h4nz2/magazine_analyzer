@@ -450,20 +450,36 @@ class MagazineSplitter
 end
 
 # Main execution
-if ARGV.empty?
-  puts "Usage: ruby split_magazine.rb <yaml_file>"
+magazines_dir = 'magazines'
+
+unless Dir.exist?(magazines_dir)
+  puts "Error: Directory '#{magazines_dir}' not found"
   exit 1
 end
 
-yaml_file = ARGV[0]
+# Find all YAML files in the magazines directory
+yaml_files = Dir.glob(File.join(magazines_dir, '*.yaml'))
 
-unless File.exist?(yaml_file)
-  puts "Error: File '#{yaml_file}' not found"
+if yaml_files.empty?
+  puts "No YAML files found in #{magazines_dir}/"
   exit 1
 end
 
-splitter = MagazineSplitter.new(yaml_file)
-articles = splitter.extract_articles
+puts "Found #{yaml_files.length} magazine YAML files"
 
-puts "\nExtracted #{articles.length} articles"
-puts "Articles saved to: #{File.join(File.dirname(yaml_file), File.basename(yaml_file, '.yaml') + '_articles')}"
+yaml_files.each_with_index do |yaml_file, idx|
+  puts "\n[#{idx + 1}/#{yaml_files.length}] Processing: #{File.basename(yaml_file)}"
+  
+  begin
+    splitter = MagazineSplitter.new(yaml_file)
+    articles = splitter.extract_articles
+    
+    output_dir = File.join(File.dirname(yaml_file), File.basename(yaml_file, '.yaml') + '_articles')
+    puts "  ✓ Extracted #{articles.length} articles"
+    puts "  ✓ Articles saved to: #{output_dir}"
+  rescue => e
+    puts "  ✗ Error processing #{File.basename(yaml_file)}: #{e.message}"
+  end
+end
+
+puts "\n=== Processing Complete ==="
