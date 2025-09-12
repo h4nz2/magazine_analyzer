@@ -327,6 +327,7 @@ class MagazineSplitter
 
   def extract_article_content_with_bounds(article, next_article = nil)
     content = []
+    images = []
     pages = []
     end_page = next_article ? next_article[:start_page] - 1 : article[:start_page] + 20
 
@@ -343,11 +344,22 @@ class MagazineSplitter
 
         content << text
         pages << page_num
+        
+        # Collect images from this page if they exist
+        if page_data['images'] && !page_data['images'].empty?
+          page_data['images'].each do |image|
+            # Add page number to image metadata for reference
+            image_with_page = image.dup
+            image_with_page['page'] = page_num
+            images << image_with_page
+          end
+        end
       end
     end
 
     article[:content] = content.join("\n")
     article[:pages] = pages
+    article[:images] = images unless images.empty?
   end
 
   def merge_article_lists(articles1, articles2)
@@ -384,12 +396,19 @@ class MagazineSplitter
     # Save summary
     summary_file = File.join(@output_dir, 'summary.yaml')
     summary = articles.map do |article|
-      {
+      summary_data = {
         'title' => article[:title],
         'start_page' => article[:start_page],
         'pages' => article[:pages],
         'filename' => generate_filename(article)
       }
+      
+      # Include image count in summary for quick reference
+      if article[:images] && !article[:images].empty?
+        summary_data['image_count'] = article[:images].length
+      end
+      
+      summary_data
     end
 
     File.write(summary_file, summary.to_yaml)
@@ -405,9 +424,15 @@ class MagazineSplitter
         'pages' => article[:pages],
         'content' => article[:content]
       }
+      
+      # Include images if the article has any
+      if article[:images] && !article[:images].empty?
+        article_data['images'] = article[:images]
+      end
 
       File.write(filepath, article_data.to_yaml)
-      puts "  Saved: #{filename}"
+      image_info = article[:images] ? " (#{article[:images].length} images)" : ""
+      puts "  Saved: #{filename}#{image_info}"
     end
   end
 
