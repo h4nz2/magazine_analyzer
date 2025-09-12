@@ -14,89 +14,55 @@ class MagazineSplitter
   def extract_articles
     FileUtils.mkdir_p(@output_dir)
     
-    articles = []
-    current_article = nil
-    
-    @data['pages'].each do |page_data|
-      page_num = page_data['page']
-      text = page_data['text'] || ''
-      
-      # Look for article headers (uppercase text that appears to be titles)
-      lines = text.split("\n")
-      
-      lines.each_with_index do |line, idx|
-        stripped = line.strip
-        
-        # Skip empty lines
-        next if stripped.empty?
-        
-        # Detect potential article titles - look for patterns like section headers
-        if is_article_title?(stripped, lines, idx)
-          # Save previous article if exists
-          if current_article && !current_article[:content].strip.empty?
-            articles << current_article
-          end
-          
-          # Start new article
-          current_article = {
-            title: clean_title(stripped),
-            start_page: page_num,
-            content: "",
-            pages: [page_num]
-          }
-        elsif current_article
-          # Add content to current article
-          current_article[:content] += line + "\n"
-          current_article[:pages] << page_num unless current_article[:pages].include?(page_num)
-        end
-      end
-    end
-    
-    # Save last article
-    if current_article && !current_article[:content].strip.empty?
-      articles << current_article
-    end
-    
-    # Also extract articles based on table of contents patterns
+    # First extract articles from TOC which gives us reliable page numbers
     toc_articles = extract_from_toc
     
-    # Merge both approaches
-    all_articles = merge_article_lists(articles, toc_articles)
+    # Sort by start page for proper content extraction
+    toc_articles.sort_by! { |a| a[:start_page] }
+    
+    # Extract content for each article with proper boundaries
+    toc_articles.each_with_index do |article, idx|
+      next_article = toc_articles[idx + 1]
+      extract_article_content_with_bounds(article, next_article)
+    end
+    
+    # Remove articles with no content
+    toc_articles.reject! { |a| a[:content].to_s.strip.empty? }
     
     # Save articles to files
-    save_articles(all_articles)
+    save_articles(toc_articles)
     
-    all_articles
+    toc_articles
   end
   
   private
   
-  def is_article_title?(line, lines, idx)
+  def is_article_title?(line, lines = [], idx = 0)
     # Check if line appears to be a title
     return false if line.length < 3
     
-    # Common section headers in the magazine
+    # Common section headers in the magazine (with flexible capitalization)
     title_patterns = [
-      /^EdiTorial$/i,
-      /^EinrEisE$/i,
-      /^FundstückE$/i,
-      /^AlltAgsWundEr$/i,
-      /^gEdAnkEngAng$/i,
-      /^culinAriA HElvEticA$/i,
-      /^EinWAndErEr$/i,
-      /^spEziAlist$/i,
-      /^scHWErpunkt$/i,
-      /^AltErnAtivEs rEisEn$/i,
-      /^HElvEtAriEn$/i,
-      /^AvAntgArdE$/i,
-      /^HErkunFt$/i,
-      /^BrEttEr dEr HEiMAt$/i,
-      /^AngEWAndt$/i,
-      /^Es WAr EinMAl$/i,
-      /^kunststückE$/i,
-      /^AusrEisE$/i,
-      /^kindErrEport$/i,
-      /^gEMEindEportrAit$/i
+      /EdiTorial/i,
+      /EinrEisE/i,
+      /FundstückE/i,
+      /AlltAgsWundEr/i,
+      /gEdAnkEngAng/i,
+      /culinAriA\s+HElvEticA/i,
+      /EinWAndErEr/i,
+      /spEziAlist/i,
+      /scHWErpunkt/i,
+      /AltErnAtivEs\s+rEisEn/i,
+      /HElvEtAriEn/i,
+      /AvAntgArdE/i,
+      /HErkunFt/i,
+      /BrEttEr\s+dEr\s+HEiMAt/i,
+      /AngEWAndt/i,
+      /Es\s+WAr\s+EinMAl/i,
+      /kunststückE/i,
+      /AusrEisE/i,
+      /kindErrEport/i,
+      /gEMEindEportrAit/i
     ]
     
     title_patterns.any? { |pattern| line.match?(pattern) }
@@ -107,60 +73,141 @@ class MagazineSplitter
     title.gsub(/\s+/, ' ').strip
   end
   
-  def extract_from_toc
-    articles = []
-    
-    @data['pages'].each do |page_data|
-      text = page_data['text'] || ''
-      
-      # Look for table of contents patterns
-      if text.include?('iNHalT') || text.include?('INHALT')
-        
-        # Extract article entries from TOC
-        lines = text.split("\n")
-        lines.each do |line|
-          # Match patterns like "14 Saure Grüsse" or "22 Der Herr des Mythenkreuzes"
-          if match = line.match(/^\s*(\d{1,2})\s+(.+?)(?:\s{2,}|$)/)
-            page_num = match[1].to_i
-            title = match[2].strip
-            
-            # Skip if title is too short or looks like noise
-            next if title.length < 5
-            
-            articles << {
-              title: title,
-              start_page: page_num,
-              toc_entry: true
-            }
-          end
-        end
-      end
-    end
-    
-    # Now extract content for TOC articles
-    articles.each do |article|
-      extract_article_content(article)
-    end
-    
-    articles
+  def clean_toc_title(title)
+    # Remove page numbers that might be embedded in title
+    title = title.gsub(/\d{1,3}\s*$/, '').strip
+    # Remove section headers that might be attached
+    title = title.gsub(/\s*(EinrEisE|scHWErpunkt|HElvEtAriEn|FundstückE|AlltAgsWundEr|gEdAnkEngAng|culinAriA HElvEticA|EinWAndErEr|spEziAlist|AltErnAtivEs rEisEn|AvAntgArdE|HErkunFt|BrEttEr dEr HEiMAt|AngEWAndt|Es WAr EinMAl|kunststückE|AusrEisE|kindErrEport|gEMEindEportrAit).*$/i, '')
+    # Clean up extra spaces
+    title.gsub(/\s+/, ' ').strip
   end
   
-  def extract_article_content(article)
-    content = []
-    pages = []
-    in_article = false
+  def is_section_header?(text)
+    section_headers = [
+      'EinrEisE', 'scHWErpunkt', 'HElvEtAriEn', 'FundstückE', 
+      'AlltAgsWundEr', 'gEdAnkEngAng', 'culinAriA HElvEticA', 
+      'EinWAndErEr', 'spEziAlist', 'AltErnAtivEs rEisEn', 
+      'AvAntgArdE', 'HErkunFt', 'BrEttEr dEr HEiMAt', 
+      'AngEWAndt', 'Es WAr EinMAl', 'kunststückE', 
+      'AusrEisE', 'kindErrEport', 'gEMEindEportrAit'
+    ]
+    
+    section_headers.any? { |header| text.match?(/^#{Regexp.escape(header)}$/i) }
+  end
+  
+  def is_new_article_start?(text)
+    # Check if this text contains a section header indicating a new article
+    return false if text.nil? || text.empty?
+    
+    lines = text.split("\n").first(5) # Check first 5 lines
+    lines.any? { |line| is_article_title?(line.strip) }
+  end
+  
+  def detect_articles_from_headers
+    articles = []
     
     @data['pages'].each do |page_data|
       page_num = page_data['page']
       text = page_data['text'] || ''
       
-      if page_num >= article[:start_page]
-        in_article = true
+      lines = text.split("\n")
+      lines.each do |line|
+        stripped = line.strip
+        
+        if is_article_title?(stripped)
+          articles << {
+            title: clean_title(stripped),
+            start_page: page_num,
+            header_detected: true
+          }
+        end
       end
+    end
+    
+    articles
+  end
+  
+  def extract_from_toc
+    articles = []
+    toc_found = false
+    
+    @data['pages'].each do |page_data|
+      text = page_data['text'] || ''
       
-      if in_article
-        # Check if we've reached the next article (heuristic)
-        if page_num > article[:start_page] + 10
+      # Look for table of contents patterns
+      if text.match?(/iNHalT|INHALT|inhalt/i)
+        toc_found = true
+        
+        # The TOC text might have entries separated by spaces instead of newlines
+        # Split by multiple patterns to extract individual entries
+        
+        # First try to extract patterns like "07 Yoshimi Takano"
+        text.scan(/(\d{1,3})\s+([A-Za-zÄÖÜäöü][^\d]{3,50})(?=\s+\d|\s+[A-Z]|$)/) do |page, title|
+          page_num = page.to_i
+          title = title.strip
+          
+          # Clean up title - remove trailing section names
+          title = title.gsub(/\s*(EinrEisE|scHWErpunkt|HElvEtAriEn|FundstückE|AlltAgsWundEr|gEdAnkEngAng|culinAriA HElvEticA|EinWAndErEr|spEziAlist|AltErnAtivEs rEisEn|AvAntgArdE|HErkunFt|BrEttEr dEr HEiMAt|AngEWAndt|Es WAr EinMAl|kunststückE|AusrEisE|kindErrEport|gEMEindEportrAit).*$/i, '')
+          title = clean_toc_title(title)
+          
+          next if title.length < 3 || page_num == 0
+          
+          articles << {
+            title: title,
+            start_page: page_num,
+            toc_entry: true
+          }
+        end
+        
+        # Also look for section headers with their page numbers in various formats
+        # Pattern like "Saure Grüsse aus dem Wallis 14"
+        text.scan(/([A-Za-zÄÖÜäöü][^\d]{5,50})\s+(\d{1,3})(?=\s|$)/) do |title, page|
+          page_num = page.to_i
+          title = title.strip
+          
+          # Skip section headers
+          next if is_section_header?(title)
+          
+          title = clean_toc_title(title)
+          
+          next if title.length < 3 || page_num == 0
+          
+          articles << {
+            title: title,
+            start_page: page_num,
+            toc_entry: true
+          }
+        end
+      end
+    end
+    
+    # If no TOC found, try to detect articles from section headers
+    if !toc_found || articles.empty?
+      articles = detect_articles_from_headers
+    end
+    
+    # Remove duplicates based on page number
+    articles.uniq! { |a| a[:start_page] }
+    
+    # Sort by page number
+    articles.sort_by! { |a| a[:start_page] }
+    
+    articles
+  end
+  
+  def extract_article_content_with_bounds(article, next_article = nil)
+    content = []
+    pages = []
+    end_page = next_article ? next_article[:start_page] - 1 : article[:start_page] + 20
+    
+    @data['pages'].each do |page_data|
+      page_num = page_data['page']
+      text = page_data['text'] || ''
+      
+      # Check if we're within the article's page range
+      if page_num >= article[:start_page] && page_num <= end_page
+        # Check if this page starts a new article (by looking for section headers)
+        if page_num > article[:start_page] && is_new_article_start?(text) && next_article && page_num >= next_article[:start_page]
           break
         end
         
