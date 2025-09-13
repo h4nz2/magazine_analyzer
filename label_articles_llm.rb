@@ -6,7 +6,7 @@ require 'uri'
 require 'json'
 require 'dotenv/load'
 
-class ArticleLabelerLLM
+class ArticleLabeler
   # Using Claude API for labeling
   CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages'
   
@@ -163,267 +163,29 @@ class ArticleLabelerLLM
   end
 end
 
-# Alternative: Using OpenAI API
-class ArticleLabelerOpenAI
-  OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions'
-  
-  def initialize(article_file, api_key = nil)
-    @article_file = article_file
-    @article_data = YAML.load_file(article_file)
-    @api_key = api_key || ENV['OPENAI_API_KEY']
-    
-    if @api_key.nil? || @api_key.empty?
-      raise "Please set OPENAI_API_KEY environment variable or pass API key as argument"
-    end
-  end
-  
-  def analyze_and_label
-    content = @article_data['content'] || ''
-    title = @article_data['title'] || ''
-    
-    article_text = "Title: #{title}\n\nContent: #{content[0..3000]}"
-    
-    labels = get_llm_labels(article_text)
-    
-    @article_data['labels'] = labels
-    File.write(@article_file, @article_data.to_yaml)
-    
-    labels
-  end
-  
-  private
-  
-  def get_llm_labels(text)
-    prompt = <<~PROMPT
-      Analyze this Swiss magazine article and extract relevant labels.
-      
-      Article:
-      #{text}
-      
-      Please provide:
-      1. LOCATIONS: List all mentioned locations (countries, Swiss cantons, cities, regions, landmarks)
-      2. TOPICS: Identify main topics from: food, culture, nature, history, architecture, people, transportation, wildlife, art, music, sports, religion, economy, technology, language, travel, tourism, tradition, education, health, politics, environment, agriculture, industry, literature, theater, fashion, photography
-      3. KEYWORDS: Extract 5-10 specific keywords that capture the essence
-      
-      Return as JSON:
-      {
-        "locations": [{"type": "country", "name": "Switzerland"}],
-        "topics": ["food", "culture"],
-        "keywords": ["keyword1", "keyword2"]
-      }
-    PROMPT
-    
-    response = call_openai_api(prompt)
-    parse_openai_response(response)
-  rescue => e
-    puts "Error calling OpenAI: #{e.message}"
-    { 'locations' => [], 'categories' => {}, 'keywords' => [] }
-  end
-  
-  def call_openai_api(prompt)
-    uri = URI.parse(OPENAI_API_URL)
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    
-    request = Net::HTTP::Post.new(uri.path)
-    request['Content-Type'] = 'application/json'
-    request['Authorization'] = "Bearer #{@api_key}"
-    
-    request.body = {
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are an expert at analyzing Swiss magazine articles and extracting location and topic labels. Always respond with valid JSON.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      temperature: 0.3,
-      max_tokens: 500
-    }.to_json
-    
-    response = http.request(request)
-    
-    if response.code != '200'
-      raise "API request failed: #{response.code} - #{response.body}"
-    end
-    
-    JSON.parse(response.body)
-  end
-  
-  def parse_openai_response(response)
-    content = response.dig('choices', 0, 'message', 'content') || ''
-    
-    begin
-      result = JSON.parse(content)
-      return {
-        'locations' => result['locations'] || [],
-        'topics' => result['topics'] || [],
-        'keywords' => result['keywords'] || []
-      }
-    rescue JSON::ParserError
-      puts "Failed to parse JSON from OpenAI response"
-      { 'locations' => [], 'topics' => [], 'keywords' => [] }
-    end
-  end
-end
-
-# Local LLM option using Ollama
-class ArticleLabelerOllama
-  OLLAMA_API_URL = 'http://localhost:11434/api/generate'
-  
-  def initialize(article_file, model = 'llama2')
-    @article_file = article_file
-    @article_data = YAML.load_file(article_file)
-    @model = model
-  end
-  
-  def analyze_and_label
-    content = @article_data['content'] || ''
-    title = @article_data['title'] || ''
-    
-    article_text = "Title: #{title}\n\nContent: #{content[0..2000]}"
-    
-    labels = get_llm_labels(article_text)
-    
-    @article_data['labels'] = labels
-    File.write(@article_file, @article_data.to_yaml)
-    
-    labels
-  end
-  
-  private
-  
-  def get_llm_labels(text)
-    prompt = <<~PROMPT
-      Analyze this Swiss magazine article and extract labels.
-      
-      Article: #{text}
-      
-      Extract:
-      1. All locations mentioned (countries, cities, regions)
-      2. Categories from: Geography & Places, Culture & Arts, Travel & Transportation, History & Heritage, Nature & Outdoors, Food & Drink, People & Profiles, Curiosities & Discoveries, Events & Seasonal, Lifestyle & Society
-      3. 5-10 keywords
-      
-      Format as JSON:
-      {
-        "locations": [{"type": "country", "name": "Switzerland"}],
-        "categories": {
-          "geography_places": ["label"],
-          "culture_arts": [],
-          "travel_transportation": [],
-          "history_heritage": [],
-          "nature_outdoors": [],
-          "food_drink": [],
-          "people_profiles": [],
-          "curiosities_discoveries": [],
-          "events_seasonal": [],
-          "lifestyle_society": []
-        },
-        "keywords": ["keyword1", "keyword2"]
-      }
-    PROMPT
-    
-    response = call_ollama_api(prompt)
-    parse_ollama_response(response)
-  rescue => e
-    puts "Error calling Ollama: #{e.message}"
-    { 'locations' => [], 'categories' => {}, 'keywords' => [] }
-  end
-  
-  def call_ollama_api(prompt)
-    uri = URI.parse(OLLAMA_API_URL)
-    http = Net::HTTP.new(uri.host, uri.port)
-    
-    request = Net::HTTP::Post.new(uri.path)
-    request['Content-Type'] = 'application/json'
-    
-    request.body = {
-      model: @model,
-      prompt: prompt,
-      stream: false
-    }.to_json
-    
-    response = http.request(request)
-    
-    if response.code != '200'
-      raise "Ollama request failed: #{response.code}"
-    end
-    
-    JSON.parse(response.body)
-  end
-  
-  def parse_ollama_response(response)
-    content = response['response'] || ''
-    
-    # Try to extract JSON from response
-    json_match = content.match(/\{.*\}/m)
-    if json_match
-      begin
-        result = JSON.parse(json_match[0])
-        return {
-          'locations' => parse_locations(result['locations']),
-          'categories' => result['categories'] || {},
-          'keywords' => result['keywords'] || []
-        }
-      rescue JSON::ParserError
-        puts "Failed to parse JSON from Ollama response"
-      end
-    end
-    
-    { 'locations' => [], 'categories' => {}, 'keywords' => [] }
-  end
-  
-  def parse_locations(locations)
-    return [] unless locations.is_a?(Array)
-    
-    locations.map do |loc|
-      if loc.is_a?(Hash)
-        loc
-      elsif loc.is_a?(String)
-        { 'type' => 'unknown', 'name' => loc }
-      else
-        nil
-      end
-    end.compact
-  end
-end
 
 # Process articles
-def process_magazine_articles(magazine_dir, llm_provider = 'ollama')
+def process_magazine_articles(magazine_dir)
   article_files = Dir.glob(File.join(magazine_dir, '*.yaml')).reject { |f| f.include?('summary.yaml') }
-  
-  puts "Processing #{article_files.length} articles in #{File.basename(magazine_dir)} using #{llm_provider}..."
-  
+
+  puts "Processing #{article_files.length} articles in #{File.basename(magazine_dir)} using Claude..."
+
   article_files.each_with_index do |article_file, idx|
     begin
-      labeler = case llm_provider.downcase
-      when 'claude'
-        ArticleLabelerLLM.new(article_file)
-      when 'openai'
-        ArticleLabelerOpenAI.new(article_file)
-      when 'ollama'
-        ArticleLabelerOllama.new(article_file)
-      else
-        raise "Unknown LLM provider: #{llm_provider}"
-      end
-      
+      labeler = ArticleLabeler.new(article_file)
       labels = labeler.analyze_and_label
-      
+
       puts "  [#{idx+1}/#{article_files.length}] #{File.basename(article_file)}:"
       puts "    Locations: #{labels['locations'].map { |l| l.is_a?(Hash) ? l['name'] : l }.join(', ')}"
-      
+
       # Display categories with values
       categories_display = labels['categories'].select { |k, v| v&.any? }.map { |k, v| "#{k}: #{v.join(', ')}" }
       puts "    Categories: #{categories_display.join(' | ')}"
-      
+
       puts "    Keywords: #{labels['keywords'].join(', ')}"
-      
+
       # Rate limiting for API calls
-      sleep(0.5) if llm_provider != 'ollama'
+      sleep(0.5)
     rescue => e
       puts "  Error processing #{File.basename(article_file)}: #{e.message}"
     end
@@ -432,26 +194,21 @@ end
 
 # Main execution
 magazine_arg = ARGV[0] || 'all'
-llm_provider = ARGV[1] || 'claude'
 
 if ARGV.include?('--help') || ARGV.include?('-h')
-  puts "Usage: ruby label_articles_llm.rb [magazine_directory] [llm_provider]"
+  puts "Usage: ruby label_articles_llm.rb [magazine_directory]"
   puts ""
-  puts "Defaults: ruby label_articles_llm.rb all claude"
+  puts "Defaults: ruby label_articles_llm.rb all"
   puts ""
-  puts "LLM providers: claude (default), openai, ollama"
-  puts ""
-  puts "For Claude: set ANTHROPIC_API_KEY environment variable"
-  puts "For OpenAI: set OPENAI_API_KEY environment variable"
-  puts "For Ollama: ensure Ollama is running locally with a model installed"
+  puts "Requires: ANTHROPIC_API_KEY environment variable"
   exit 1
 end
 
 if magazine_arg == 'all'
   magazine_dirs = Dir.glob('/home/hanz/panter/transhelvetica/magazines/*_articles')
-  
+
   magazine_dirs.each do |dir|
-    process_magazine_articles(dir, llm_provider)
+    process_magazine_articles(dir)
     puts "---"
   end
 else
@@ -459,8 +216,8 @@ else
     puts "Error: Directory '#{magazine_arg}' not found"
     exit 1
   end
-  
-  process_magazine_articles(magazine_arg, llm_provider)
+
+  process_magazine_articles(magazine_arg)
 end
 
-puts "\nLLM-based labeling complete!"
+puts "\nLabeling complete!"
