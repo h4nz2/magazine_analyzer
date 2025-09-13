@@ -4,6 +4,7 @@ require 'yaml'
 require 'net/http'
 require 'uri'
 require 'json'
+require 'dotenv/load'
 
 class ArticleLabelerLLM
   # Using Claude API for labeling
@@ -49,7 +50,29 @@ class ArticleLabelerLLM
       
       Please provide:
       1. LOCATIONS: List all mentioned locations (countries, Swiss cantons, cities, regions, landmarks). Be specific - if a Swiss city is mentioned, include it.
-      2. TOPICS: Identify the main topics of the article from this list: food, culture, nature, history, architecture, people, transportation, wildlife, art, music, sports, religion, economy, technology, language, travel, tourism, tradition, education, health, politics, environment, agriculture, industry, literature, theater, fashion, photography
+      
+      2. CATEGORIES: Classify the article into relevant categories from the following structure. Select ALL that apply:
+      
+      Geography & Places: Swiss Cantons, Alpine Regions, Urban Centers, Border Areas, Lake Districts, Valley Communities, Mountain Peaks, European Destinations, Cross-Border Regions, Remote Locations, Accessibility & Transportation Hubs, UNESCO World Heritage Sites, Natural Parks & Reserves
+      
+      Culture & Arts: Traditional Crafts, Contemporary Art, Music & Concerts, Theater & Performance, Literature & Poetry, Photography & Visual Media, Cultural Festivals, Folk Traditions, Religious Heritage, Multicultural Communities, Language & Dialects, Design & Architecture, Street Art & Public Installations
+      
+      Travel & Transportation: Train Journeys, Hiking & Walking Routes, Cycling Paths, Public Transportation, Cable Cars & Funiculars, Road Trips, Accommodation & Hotels, Travel Planning, Seasonal Travel, Accessible Tourism, Adventure Sports, Budget Travel, Luxury Experiences
+      
+      History & Heritage: Medieval History, Industrial Heritage, Military History, Archaeological Sites, Historic Buildings, Political History, Social Movements, Immigration & Migration, Economic Development, Technological Innovation, Religious History, Family Histories, Preservation Efforts
+      
+      Nature & Outdoors: Mountain Landscapes, Water Bodies, Forests & Woodlands, Wildlife & Flora, Climate & Weather, Environmental Conservation, Outdoor Activities, Seasonal Changes, Natural Phenomena, Geological Features, Agriculture & Farming, Sustainable Living, Eco-Tourism
+      
+      Food & Drink: Traditional Cuisine, Regional Specialties, Wine & Viticulture, Local Markets, Restaurants & Dining, Food Festivals, Artisanal Products, Cooking Techniques, Food History, Modern Gastronomy, Seasonal Ingredients, Food Culture & Customs, Beverages & Spirits
+      
+      People & Profiles: Local Artisans, Cultural Figures, Historical Personalities, Community Leaders, Entrepreneurs, Artists & Creators, Scientists & Researchers, Political Figures, Immigrant Stories, Youth & Education, Elder Wisdom, Professional Profiles, Social Innovators
+      
+      Curiosities & Discoveries: Hidden Gems, Unusual Traditions, Scientific Discoveries, Archaeological Finds, Mysterious Places, Quirky Architecture, Local Legends, Surprising Statistics, Forgotten Stories, Modern Mysteries, Cultural Oddities, Unexpected Connections
+      
+      Events & Seasonal: Annual Festivals, Cultural Celebrations, Seasonal Activities, Holiday Traditions, Temporary Exhibitions, Sporting Events, Markets & Fairs, Religious Observances, Contemporary Events, Recurring Gatherings, Weather-Dependent Activities, Calendar Highlights, Community Gatherings
+      
+      Lifestyle & Society: Urban Development, Social Trends, Technology & Innovation, Education & Learning, Healthcare & Wellness, Work & Economy, Housing & Living, Transportation Trends, Environmental Awareness, Cultural Integration, Generational Changes, Quality of Life, Future Planning
+      
       3. KEYWORDS: Extract 5-10 specific keywords that capture the essence of the article (in the original language where appropriate)
       
       Format your response as JSON:
@@ -60,11 +83,22 @@ class ArticleLabelerLLM
           {"type": "city", "name": "Basel"},
           {"type": "region", "name": "Alps"}
         ],
-        "topics": ["food", "culture"],
+        "categories": {
+          "geography_places": ["Swiss Cantons", "Alpine Regions"],
+          "culture_arts": ["Traditional Crafts"],
+          "travel_transportation": ["Train Journeys"],
+          "history_heritage": [],
+          "nature_outdoors": ["Mountain Landscapes"],
+          "food_drink": [],
+          "people_profiles": [],
+          "curiosities_discoveries": [],
+          "events_seasonal": [],
+          "lifestyle_society": []
+        },
         "keywords": ["keyword1", "keyword2"]
       }
       
-      Be thorough but precise. Only include locations that are actually mentioned in the text.
+      Be thorough but precise. Only include locations that are actually mentioned in the text. For categories, only include labels that are directly relevant to the content.
     PROMPT
     
     response = call_claude_api(prompt)
@@ -116,7 +150,7 @@ class ArticleLabelerLLM
         result = JSON.parse(json_match[0])
         return {
           'locations' => result['locations'] || [],
-          'topics' => result['topics'] || [],
+          'categories' => result['categories'] || {},
           'keywords' => result['keywords'] || []
         }
       rescue JSON::ParserError
@@ -125,7 +159,7 @@ class ArticleLabelerLLM
     end
     
     # Fallback parsing if JSON extraction fails
-    { 'locations' => [], 'topics' => [], 'keywords' => [] }
+    { 'locations' => [], 'categories' => {}, 'keywords' => [] }
   end
 end
 
@@ -183,7 +217,7 @@ class ArticleLabelerOpenAI
     parse_openai_response(response)
   rescue => e
     puts "Error calling OpenAI: #{e.message}"
-    { 'locations' => [], 'topics' => [], 'keywords' => [] }
+    { 'locations' => [], 'categories' => {}, 'keywords' => [] }
   end
   
   def call_openai_api(prompt)
@@ -271,17 +305,33 @@ class ArticleLabelerOllama
       
       Extract:
       1. All locations mentioned (countries, cities, regions)
-      2. Main topics from: food, culture, nature, history, architecture, people, transportation, wildlife, art, music, sports, religion, economy, technology, language
+      2. Categories from: Geography & Places, Culture & Arts, Travel & Transportation, History & Heritage, Nature & Outdoors, Food & Drink, People & Profiles, Curiosities & Discoveries, Events & Seasonal, Lifestyle & Society
       3. 5-10 keywords
       
-      Format as JSON with keys: locations, topics, keywords
+      Format as JSON:
+      {
+        "locations": [{"type": "country", "name": "Switzerland"}],
+        "categories": {
+          "geography_places": ["label"],
+          "culture_arts": [],
+          "travel_transportation": [],
+          "history_heritage": [],
+          "nature_outdoors": [],
+          "food_drink": [],
+          "people_profiles": [],
+          "curiosities_discoveries": [],
+          "events_seasonal": [],
+          "lifestyle_society": []
+        },
+        "keywords": ["keyword1", "keyword2"]
+      }
     PROMPT
     
     response = call_ollama_api(prompt)
     parse_ollama_response(response)
   rescue => e
     puts "Error calling Ollama: #{e.message}"
-    { 'locations' => [], 'topics' => [], 'keywords' => [] }
+    { 'locations' => [], 'categories' => {}, 'keywords' => [] }
   end
   
   def call_ollama_api(prompt)
@@ -316,7 +366,7 @@ class ArticleLabelerOllama
         result = JSON.parse(json_match[0])
         return {
           'locations' => parse_locations(result['locations']),
-          'topics' => result['topics'] || [],
+          'categories' => result['categories'] || {},
           'keywords' => result['keywords'] || []
         }
       rescue JSON::ParserError
@@ -324,7 +374,7 @@ class ArticleLabelerOllama
       end
     end
     
-    { 'locations' => [], 'topics' => [], 'keywords' => [] }
+    { 'locations' => [], 'categories' => {}, 'keywords' => [] }
   end
   
   def parse_locations(locations)
@@ -365,7 +415,11 @@ def process_magazine_articles(magazine_dir, llm_provider = 'ollama')
       
       puts "  [#{idx+1}/#{article_files.length}] #{File.basename(article_file)}:"
       puts "    Locations: #{labels['locations'].map { |l| l.is_a?(Hash) ? l['name'] : l }.join(', ')}"
-      puts "    Topics: #{labels['topics'].join(', ')}"
+      
+      # Display categories with values
+      categories_display = labels['categories'].select { |k, v| v&.any? }.map { |k, v| "#{k}: #{v.join(', ')}" }
+      puts "    Categories: #{categories_display.join(' | ')}"
+      
       puts "    Keywords: #{labels['keywords'].join(', ')}"
       
       # Rate limiting for API calls

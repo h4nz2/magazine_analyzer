@@ -147,13 +147,15 @@ class ArticleImporter
           end
         end
         
-        # Topics
-        if data['labels']['topics']
-          data['labels']['topics'].each do |topic|
-            @conn.exec_params(
-              "INSERT INTO article_topics (article_id, topic) VALUES ($1, $2)",
-              [article_id, topic]
-            )
+        # Categories
+        if data['labels']['categories']
+          data['labels']['categories'].each do |category_type, labels|
+            labels.each do |label|
+              @conn.exec_params(
+                "INSERT INTO article_categories (article_id, category_type, label) VALUES ($1, $2, $3)",
+                [article_id, category_type, label]
+              )
+            end
           end
         end
         
@@ -165,6 +167,16 @@ class ArticleImporter
               [article_id, keyword]
             )
           end
+        end
+      end
+      
+      # Insert questions
+      if data['questions']
+        data['questions'].each_with_index do |question, idx|
+          @conn.exec_params(
+            "INSERT INTO article_questions (article_id, question, question_order) VALUES ($1, $2, $3)",
+            [article_id, question, idx + 1]
+          )
         end
       end
       

@@ -17,7 +17,9 @@ class DatabaseSetup
     
     # Drop existing tables if they exist (be careful with this in production!)
     drop_sql = <<-SQL
+      DROP TABLE IF EXISTS article_questions CASCADE;
       DROP TABLE IF EXISTS article_keywords CASCADE;
+      DROP TABLE IF EXISTS article_categories CASCADE;
       DROP TABLE IF EXISTS article_topics CASCADE;
       DROP TABLE IF EXISTS article_locations CASCADE;
       DROP TABLE IF EXISTS article_images CASCADE;
@@ -80,10 +82,11 @@ class DatabaseSetup
           name VARCHAR(255)
       );
 
-      CREATE TABLE article_topics (
+      CREATE TABLE article_categories (
           id SERIAL PRIMARY KEY,
           article_id INTEGER REFERENCES articles(id) ON DELETE CASCADE,
-          topic VARCHAR(100)
+          category_type VARCHAR(50) NOT NULL,
+          label VARCHAR(100) NOT NULL
       );
 
       CREATE TABLE article_keywords (
@@ -92,19 +95,30 @@ class DatabaseSetup
           keyword VARCHAR(255)
       );
 
+      CREATE TABLE article_questions (
+          id SERIAL PRIMARY KEY,
+          article_id INTEGER REFERENCES articles(id) ON DELETE CASCADE,
+          question TEXT NOT NULL,
+          question_order INTEGER,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
       -- Indexes for better search performance
       CREATE INDEX idx_magazines_number ON magazines(magazine_number);
       CREATE INDEX idx_articles_magazine_id ON articles(magazine_id);
       CREATE INDEX idx_article_pages_article_id ON article_pages(article_id);
       CREATE INDEX idx_article_images_article_id ON article_images(article_id);
       CREATE INDEX idx_article_locations_article_id ON article_locations(article_id);
-      CREATE INDEX idx_article_topics_article_id ON article_topics(article_id);
-      CREATE INDEX idx_article_topics_topic ON article_topics(topic);
+      CREATE INDEX idx_article_categories_article_id ON article_categories(article_id);
+      CREATE INDEX idx_article_categories_type ON article_categories(category_type);
+      CREATE INDEX idx_article_categories_label ON article_categories(label);
       CREATE INDEX idx_article_keywords_article_id ON article_keywords(article_id);
       CREATE INDEX idx_article_keywords_keyword ON article_keywords(keyword);
+      CREATE INDEX idx_article_questions_article_id ON article_questions(article_id);
 
       -- Full text search on content (using German dictionary)
       CREATE INDEX idx_articles_content_fts ON articles USING gin(to_tsvector('german', content));
+      CREATE INDEX idx_article_questions_fts ON article_questions USING gin(to_tsvector('german', question));
     SQL
     
     begin
