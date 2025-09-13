@@ -96,6 +96,7 @@ These queries demonstrate how to access the structured data and can be used as t
 
 ## Folder Structure
 - `magazines/` — Contains magazine PDFs, YAML files, and extracted articles (ignored by git)
+- `setup_and_process.sh` — Automated setup and processing script (recommended)
 - `pdf_to_yaml.rb` — Converts PDFs to YAML with base64 images
 - `split_magazine.rb` — Splits magazine YAML into individual articles
 - `describe_images.rb` — Replaces base64 images with AI descriptions
@@ -106,7 +107,29 @@ These queries demonstrate how to access the structured data and can be used as t
 
 ## Getting Started
 
-### Prerequisites
+### Quick Setup (Recommended)
+
+For the easiest setup experience, use the automated setup script:
+
+```bash
+chmod +x setup_and_process.sh
+./setup_and_process.sh
+```
+
+This script will:
+- Check and install all dependencies (Ruby, gems, PostgreSQL tools)
+- Guide you through environment configuration
+- Set up API keys for AI services
+- Process all PDF magazines in the magazines/ directory
+- Optionally set up and populate the database
+
+The script asks for all required information upfront, then runs the entire pipeline without interruption.
+
+### Manual Setup
+
+If you prefer manual setup:
+
+#### Prerequisites
 1. Ruby 3.0 or higher
 2. Required gems:
    ```bash
