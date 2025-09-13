@@ -6,6 +6,16 @@ This is a very simple repository, whose goal is to build something, that will be
 
 Preferably ruby programming language, alternatively other programming languages if the task cannot be done in ruby. Using language models for various tasks is also permitted.
 
+## Code structure
+
+The app consist of several independent scripts, which when run in proper sequence, will do the following:
+
+1. convert magazines from pdf to yaml
+2. split magazines into individual articles, saved in separate files
+3. replace images in the articles with AI generated description of the image
+4. classify each article and add various labels
+5. store the classified articles in a database
+
 ## Example use cases:
 
 _Question:_
