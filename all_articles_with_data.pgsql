@@ -10,7 +10,7 @@ SELECT
 		'{}'
 	) AS locations,
 	COALESCE(
-		ARRAY_AGG(DISTINCT article_categories.category_type || ':' || article_categories.label)
+		ARRAY_AGG(DISTINCT article_categories.label)
 			FILTER (WHERE article_categories.label IS NOT NULL),
 		'{}'
 	) AS categories,
@@ -18,18 +18,13 @@ SELECT
 		ARRAY_AGG(DISTINCT article_keywords.keyword)
 			FILTER (WHERE article_keywords.keyword IS NOT NULL),
 		'{}'
-	) AS keywords,
-	COALESCE(
-		ARRAY_AGG(article_questions.question ORDER BY article_questions.question_order)
-			FILTER (WHERE article_questions.question IS NOT NULL),
-		'{}'
-	) AS questions
+	) AS keywords
 FROM articles
 JOIN magazines ON articles.magazine_id = magazines.id
 LEFT JOIN article_locations ON article_locations.article_id = articles.id
 LEFT JOIN article_categories ON article_categories.article_id = articles.id
 LEFT JOIN article_keywords ON article_keywords.article_id = articles.id
-LEFT JOIN article_questions ON article_questions.article_id = articles.id
 GROUP BY magazines.magazine_number, articles.title, articles.start_page
 ORDER BY magazines.magazine_number, articles.start_page
+LIMIT 20
 
