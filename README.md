@@ -84,6 +84,16 @@ Stores processed articles with their descriptions and labels in the database for
 ruby import_articles.rb
 ```
 
+## Database Queries
+
+### Sample Queries
+The repository includes sample SQL queries to help you explore the processed magazine data:
+
+- **`all_articles_with_data.pgsql`** - Retrieves articles with magazine numbers, locations, categories, and keywords
+- **`all_articles_with_questions.pgsql`** - Retrieves articles with magazine numbers and all associated reader questions
+
+These queries demonstrate how to access the structured data and can be used as templates for building your own search functionality.
+
 ## Folder Structure
 - `magazines/` — Contains magazine PDFs, YAML files, and extracted articles (ignored by git)
 - `pdf_to_yaml.rb` — Converts PDFs to YAML with base64 images
