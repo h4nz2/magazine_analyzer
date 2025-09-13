@@ -46,6 +46,7 @@ class DatabaseSetup
           magazine_id INTEGER REFERENCES magazines(id) ON DELETE CASCADE,
           title VARCHAR(500) NOT NULL,
           start_page INTEGER,
+          end_page INTEGER,
           content TEXT,
           filename VARCHAR(255),
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

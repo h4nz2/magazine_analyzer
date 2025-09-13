@@ -96,11 +96,14 @@ class ArticleImporter
       # Begin transaction for this article
       @conn.exec("BEGIN")
       
+      # Calculate end_page from pages array
+      end_page = data['pages'] && data['pages'].any? ? data['pages'].max : data['start_page']
+
       # Insert article
       result = @conn.exec_params(
-        "INSERT INTO articles (magazine_id, title, start_page, content, filename) 
-         VALUES ($1, $2, $3, $4, $5) RETURNING id",
-        [magazine_id, data['title'], data['start_page'], data['content'], filename]
+        "INSERT INTO articles (magazine_id, title, start_page, end_page, content, filename)
+         VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+        [magazine_id, data['title'], data['start_page'], end_page, data['content'], filename]
       )
       
       article_id = result[0]['id']
