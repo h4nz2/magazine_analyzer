@@ -442,9 +442,13 @@ def process_magazine_articles_for_questions(magazine_dir, llm_provider = 'claude
 end
 
 # Main execution
-if ARGV.empty?
-  puts "Usage: ruby generate_questions.rb <magazine_directory> [llm_provider]"
-  puts "   or: ruby generate_questions.rb all [llm_provider]"
+magazine_arg = ARGV[0] || 'all'
+llm_provider = ARGV[1] || 'claude'
+
+if ARGV.include?('--help') || ARGV.include?('-h')
+  puts "Usage: ruby generate_questions.rb [magazine_directory] [llm_provider]"
+  puts ""
+  puts "Defaults: ruby generate_questions.rb all claude"
   puts ""
   puts "LLM providers: claude (default), openai, ollama"
   puts ""
@@ -453,9 +457,6 @@ if ARGV.empty?
   puts "For Ollama: ensure Ollama is running locally with a model installed"
   exit 1
 end
-
-magazine_arg = ARGV[0]
-llm_provider = ARGV[1] || 'claude'
 
 if magazine_arg == 'all'
   magazine_dirs = Dir.glob('/home/hanz/panter/transhelvetica/magazines/*_articles')

@@ -431,20 +431,21 @@ def process_magazine_articles(magazine_dir, llm_provider = 'ollama')
 end
 
 # Main execution
-if ARGV.empty?
-  puts "Usage: ruby label_articles_llm.rb <magazine_directory> [llm_provider]"
-  puts "   or: ruby label_articles_llm.rb all [llm_provider]"
+magazine_arg = ARGV[0] || 'all'
+llm_provider = ARGV[1] || 'claude'
+
+if ARGV.include?('--help') || ARGV.include?('-h')
+  puts "Usage: ruby label_articles_llm.rb [magazine_directory] [llm_provider]"
   puts ""
-  puts "LLM providers: ollama (default), claude, openai"
+  puts "Defaults: ruby label_articles_llm.rb all claude"
+  puts ""
+  puts "LLM providers: claude (default), openai, ollama"
   puts ""
   puts "For Claude: set ANTHROPIC_API_KEY environment variable"
   puts "For OpenAI: set OPENAI_API_KEY environment variable"
   puts "For Ollama: ensure Ollama is running locally with a model installed"
   exit 1
 end
-
-magazine_arg = ARGV[0]
-llm_provider = ARGV[1] || 'ollama'
 
 if magazine_arg == 'all'
   magazine_dirs = Dir.glob('/home/hanz/panter/transhelvetica/magazines/*_articles')

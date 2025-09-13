@@ -50,7 +50,7 @@ This step:
 Analyzes article content and adds detailed classification labels for improved search and categorization.
 
 ```bash
-ruby label_articles_llm.rb magazines/trnshlvtc01_articles/ claude
+ruby label_articles_llm.rb
 ```
 
 Labels include:
@@ -62,7 +62,7 @@ Labels include:
 Creates potential questions that readers might ask about the general topics covered in each article.
 
 ```bash
-ruby generate_questions.rb magazines/trnshlvtc01_articles/ claude
+ruby generate_questions.rb
 ```
 
 This step:
@@ -127,11 +127,11 @@ ruby split_magazine.rb
 # 3. Generate image descriptions
 ruby describe_images.rb
 
-# 4. Classify articles with detailed categories
-ruby label_articles_llm.rb all claude
+# 4. Classify articles with detailed categories (defaults to 'all' articles with 'claude')
+ruby label_articles_llm.rb
 
-# 5. Generate reader questions
-ruby generate_questions.rb all claude
+# 5. Generate reader questions (defaults to 'all' articles with 'claude')
+ruby generate_questions.rb
 
 # 6. Setup database (one time only)
 ruby db_setup.rb

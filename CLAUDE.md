@@ -80,11 +80,11 @@ ruby split_magazine.rb
 # Step 3: Describe images (optional but recommended)
 ruby describe_images.rb
 
-# Step 4: Label articles with AI using detailed categories
-ruby label_articles_llm.rb all claude
+# Step 4: Label articles with AI using detailed categories (defaults to 'all' articles with 'claude')
+ruby label_articles_llm.rb
 
-# Step 5: Generate reader questions
-ruby generate_questions.rb all claude
+# Step 5: Generate reader questions (defaults to 'all' articles with 'claude')
+ruby generate_questions.rb
 
 # Step 6: Setup database (only once)
 ruby db_setup.rb
