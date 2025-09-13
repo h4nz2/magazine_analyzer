@@ -191,6 +191,22 @@ if prompt_yes_no "Do you want to configure API keys now" "y"; then
         OLLAMA_URL=$(prompt_with_default "OLLAMA_BASE_URL" "http://localhost:11434")
         echo "OLLAMA_BASE_URL=$OLLAMA_URL" >> .env
     fi
+
+    if prompt_yes_no "Configure Voyage AI API key (for embeddings generation)" "n"; then
+        VOYAGE_KEY=$(prompt_with_default "VOYAGE_API_KEY" "")
+        if [ -n "$VOYAGE_KEY" ]; then
+            echo "VOYAGE_API_KEY=$VOYAGE_KEY" >> .env
+        fi
+    fi
+
+    if prompt_yes_no "Configure OpenAI API key for embeddings (alternative to Voyage)" "n"; then
+        if [ -z "$OPENAI_KEY" ]; then
+            OPENAI_KEY=$(prompt_with_default "OPENAI_API_KEY" "")
+            if [ -n "$OPENAI_KEY" ]; then
+                echo "OPENAI_API_KEY=$OPENAI_KEY" >> .env
+            fi
+        fi
+    fi
 fi
 
 echo
@@ -216,6 +232,13 @@ if prompt_yes_no "Import articles to database after processing" "y"; then
     IMPORT_DB=true
 else
     IMPORT_DB=false
+fi
+
+if prompt_yes_no "Generate embeddings for RAG applications (requires database)" "y"; then
+    GENERATE_EMBEDDINGS=true
+    EMBEDDING_PROVIDER=$(prompt_with_default "Which embedding provider to use (voyage/openai)" "voyage")
+else
+    GENERATE_EMBEDDINGS=false
 fi
 
 echo
@@ -253,6 +276,9 @@ if [ "$SETUP_DB" = true ]; then
 fi
 if [ "$IMPORT_DB" = true ]; then
     echo "7. Import articles to database"
+fi
+if [ "$GENERATE_EMBEDDINGS" = true ]; then
+    echo "8. Generate embeddings for RAG applications ($EMBEDDING_PROVIDER)"
 fi
 
 echo
@@ -308,6 +334,17 @@ if [ "$IMPORT_DB" = true ]; then
     echo -e "${GREEN}✓ Database import completed${NC}"
 fi
 
+# Step 8: Generate embeddings (optional)
+if [ "$GENERATE_EMBEDDINGS" = true ]; then
+    echo -e "${BLUE}Step 8: Generating embeddings for RAG applications ($EMBEDDING_PROVIDER)...${NC}"
+    if [ "$EMBEDDING_PROVIDER" = "openai" ]; then
+        EMBEDDING_PROVIDER=openai ruby generate_embeddings.rb
+    else
+        ruby generate_embeddings.rb
+    fi
+    echo -e "${GREEN}✓ Embeddings generation completed${NC}"
+fi
+
 echo
 echo -e "${GREEN}=== Processing Complete! ===${NC}"
 echo
@@ -323,12 +360,22 @@ if [ "$IMPORT_DB" = true ]; then
     echo "You can now run queries on your database using the provided SQL files:"
     echo "  - all_articles_with_data.pgsql"
     echo "  - all_articles_with_questions.pgsql"
+    echo "  - all_articles_complete.pgsql"
+fi
+
+if [ "$GENERATE_EMBEDDINGS" = true ]; then
+    echo "- Generated vector embeddings for RAG/similarity search"
+    echo "  - Embeddings stored in article_embeddings table"
+    echo "  - Provider used: $EMBEDDING_PROVIDER"
 fi
 
 echo
 echo -e "${BLUE}Next steps:${NC}"
 echo "- Review the processed articles in magazines/*_articles/ directories"
 echo "- Use the database queries to search and analyze your magazine content"
+if [ "$GENERATE_EMBEDDINGS" = true ]; then
+    echo "- Implement similarity search using the generated embeddings"
+fi
 echo "- Add more PDFs to magazines/ directory and re-run this script to process them"
 
 echo
