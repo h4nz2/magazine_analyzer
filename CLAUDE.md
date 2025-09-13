@@ -66,6 +66,15 @@ The app consists of several independent scripts that process magazine PDFs throu
    - Input: `magazines/*_articles/*.yaml`
    - Output: PostgreSQL database records
 
+8. **`generate_embeddings.rb`** - Generates embeddings for RAG applications
+   - Creates vector embeddings using Voyage AI (Anthropic's recommended provider) or OpenAI
+   - Combines title, content, categories, locations, keywords, and questions into embedding text
+   - Stores embeddings in PostgreSQL for similarity search
+   - Supports batch processing and individual article updates
+   - Configurable provider: Use `EMBEDDING_PROVIDER=voyage` (default) or `EMBEDDING_PROVIDER=openai`
+   - Input: Database articles (uses query from `all_articles_complete.pgsql`)
+   - Output: `article_embeddings` table with vector embeddings
+
 ### Execution Order
 
 Run the scripts in this sequence:
@@ -91,6 +100,13 @@ ruby db_setup.rb
 
 # Step 7: Import to database
 ruby import_articles.rb
+
+# Step 8: Generate embeddings for RAG
+# Default: Uses Voyage AI (requires VOYAGE_API_KEY)
+ruby generate_embeddings.rb
+
+# Alternative: Use OpenAI (requires OPENAI_API_KEY)
+EMBEDDING_PROVIDER=openai ruby generate_embeddings.rb
 ```
 
 ### Directory Structure

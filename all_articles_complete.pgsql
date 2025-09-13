@@ -1,5 +1,6 @@
 SELECT
 	magazines.magazine_number,
+	articles.id as article_id,
 	articles.title,
 	articles.start_page,
 	articles.end_page,
@@ -22,13 +23,14 @@ SELECT
 		ARRAY_AGG(DISTINCT article_keywords.keyword)
 			FILTER (WHERE article_keywords.keyword IS NOT NULL),
 		'{}'
-	) AS keywords
+	) AS keywords,
+	articles.content
 FROM articles
 JOIN magazines ON articles.magazine_id = magazines.id
 LEFT JOIN article_questions ON article_questions.article_id = articles.id
 LEFT JOIN article_locations ON article_locations.article_id = articles.id
 LEFT JOIN article_categories ON article_categories.article_id = articles.id
 LEFT JOIN article_keywords ON article_keywords.article_id = articles.id
-GROUP BY magazines.magazine_number, articles.title, articles.start_page, articles.end_page
+GROUP BY magazines.magazine_number, articles.id, articles.title, articles.start_page, articles.end_page, articles.content
 ORDER BY magazines.magazine_number, articles.start_page
 LIMIT 3

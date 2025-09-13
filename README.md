@@ -84,6 +84,24 @@ Stores processed articles with their descriptions and labels in the database for
 ruby import_articles.rb
 ```
 
+### Step 8: Generate Embeddings for RAG
+Creates vector embeddings for all articles to enable semantic search and RAG (Retrieval-Augmented Generation) applications.
+
+```bash
+# Using Voyage AI (default, recommended by Anthropic)
+ruby generate_embeddings.rb
+
+# Alternative: Using OpenAI
+EMBEDDING_PROVIDER=openai ruby generate_embeddings.rb
+```
+
+This step:
+- Uses Voyage AI's voyage-2 model by default (Anthropic's recommended embeddings provider)
+- Can alternatively use OpenAI's text-embedding-3-small model
+- Combines article title, content, categories, locations, keywords, and questions into embedding text
+- Stores embeddings in PostgreSQL for similarity search
+- Supports processing individual articles: `ruby generate_embeddings.rb [article_id]`
+
 ## Database Queries
 
 ### Sample Queries
@@ -104,6 +122,7 @@ These queries demonstrate how to access the structured data and can be used as t
 - `generate_questions.rb` — Generates potential reader questions for articles
 - `db_setup.rb` — Creates database schema
 - `import_articles.rb` — Imports processed articles to database
+- `generate_embeddings.rb` — Generates vector embeddings for RAG applications
 
 ## Getting Started
 
@@ -144,7 +163,9 @@ If you prefer manual setup:
    ```
    DATABASE_URL=postgresql://username:password@host:port/database
    ANTHROPIC_API_KEY=your_claude_api_key
-   OPENAI_API_KEY=your_openai_api_key
+   VOYAGE_API_KEY=your_voyage_api_key  # For embeddings (recommended)
+   OPENAI_API_KEY=your_openai_api_key  # Alternative for embeddings
+   EMBEDDING_PROVIDER=voyage  # or 'openai'
    ```
 
 ### Full Processing Workflow
@@ -171,6 +192,13 @@ ruby db_setup.rb
 
 # 7. Import to database
 ruby import_articles.rb
+
+# 8. Generate embeddings for RAG
+# Default: Uses Voyage AI (requires VOYAGE_API_KEY)
+ruby generate_embeddings.rb
+
+# Alternative: Use OpenAI (requires OPENAI_API_KEY)
+EMBEDDING_PROVIDER=openai ruby generate_embeddings.rb
 ```
 
 ### Detailed Category System
