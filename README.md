@@ -151,18 +151,18 @@ ruby import_articles.rb
 ```
 
 ### Detailed Category System
-Articles are classified using 10 main categories with 130+ specific labels:
+Articles are classified using 10 main categories with comprehensive subcategories, combining Swiss-focused topics with broad thematic coverage:
 
-- **Geography & Places**: Swiss Cantons, Alpine Regions, Urban Centers, etc.
-- **Culture & Arts**: Traditional Crafts, Contemporary Art, Music & Concerts, etc.
-- **Travel & Transportation**: Train Journeys, Hiking Routes, Public Transport, etc.
-- **History & Heritage**: Medieval History, Industrial Heritage, Archaeological Sites, etc.
-- **Nature & Outdoors**: Mountain Landscapes, Wildlife & Flora, Environmental Conservation, etc.
-- **Food & Drink**: Traditional Cuisine, Wine & Viticulture, Local Markets, etc.
-- **People & Profiles**: Local Artisans, Cultural Figures, Community Leaders, etc.
-- **Curiosities & Discoveries**: Hidden Gems, Unusual Traditions, Scientific Discoveries, etc.
-- **Events & Seasonal**: Annual Festivals, Cultural Celebrations, Sporting Events, etc.
-- **Lifestyle & Society**: Urban Development, Social Trends, Technology & Innovation, etc.
+- **Geography & Places**: Swiss Cantons (Schwyz, Wallis, Graubünden, Zürich, Bern, Tessin, Appenzell, Fribourg), Alpine Regions, Urban Centers, International Locations, etc.
+- **Culture & Arts**: Traditional Crafts, Contemporary Art, Museums, Exhibitions, Traditional Handwork (Weberei & Stickerei, Schwingen), etc.
+- **Travel & Tourism**: Train Journeys, Hiking Routes, Alpinismus, Tourism Economy, International Relations, etc.
+- **Nature & Outdoors**: Mountain Landscapes, Wildlife & Flora (Waschbär, Alpine Animals), Environmental Conservation, etc.
+- **Food & Culinary**: Traditional Cuisine, Wine & Viticulture, Gastronomie, Culinary Specialties, etc.
+- **Architecture & Gardens**: Garden Design, Historic Buildings, Modern Architecture, Landscape Architecture, etc.
+- **People & Profiles**: Local Artisans, Cultural Figures, Contemporary Actors, Authors & Writers, etc.
+- **History & Heritage**: Medieval History, Industrial Heritage, Archaeological Sites, Political History, etc.
+- **Symbols & Motifs**: Cross & Religious Symbols, Animal Symbols, Cultural Icons, Traditional Patterns, etc.
+- **Society & Lifestyle**: Urban Development, Social Trends, Language & Communication, Cultural Integration, etc.
 
 ## License
 

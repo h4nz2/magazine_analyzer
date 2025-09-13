@@ -107,27 +107,27 @@ transhelvetica/
 
 ### Detailed Category System
 
-Articles are classified using 10 main categories with detailed subcategories:
+Articles are classified using 10 main categories with comprehensive subcategories, combining Swiss-focused topics with broad thematic coverage:
 
-1. **Geography & Places**: Swiss Cantons, Alpine Regions, Urban Centers, Border Areas, Lake Districts, Valley Communities, Mountain Peaks, European Destinations, Cross-Border Regions, Remote Locations, Accessibility & Transportation Hubs, UNESCO World Heritage Sites, Natural Parks & Reserves
+1. **Geography & Places**: Swiss Cantons (Schwyz, Wallis, Graubünden, Zürich, Bern, Tessin, Appenzell, Fribourg), Alpine Regions, Urban Centers, Border Areas, Lake Districts, Valley Communities, Mountain Peaks, European Destinations, Cross-Border Regions, Remote Locations, UNESCO World Heritage Sites, Natural Parks & Reserves, International Locations
 
-2. **Culture & Arts**: Traditional Crafts, Contemporary Art, Music & Concerts, Theater & Performance, Literature & Poetry, Photography & Visual Media, Cultural Festivals, Folk Traditions, Religious Heritage, Multicultural Communities, Language & Dialects, Design & Architecture, Street Art & Public Installations
+2. **Culture & Arts**: Traditional Crafts, Contemporary Art, Music & Concerts, Theater & Performance, Literature & Poetry, Photography & Visual Media, Cultural Festivals, Folk Traditions, Religious Heritage, Multicultural Communities, Language & Dialects, Street Art & Public Installations, Museums, Exhibitions, Traditional Handwork (Weberei & Stickerei, Schwingen)
 
-3. **Travel & Transportation**: Train Journeys, Hiking & Walking Routes, Cycling Paths, Public Transportation, Cable Cars & Funiculars, Road Trips, Accommodation & Hotels, Travel Planning, Seasonal Travel, Accessible Tourism, Adventure Sports, Budget Travel, Luxury Experiences
+3. **Travel & Tourism**: Train Journeys, Hiking & Walking Routes, Cycling Paths, Public Transportation, Cable Cars & Funiculars, Road Trips, Accommodation & Hotels, Travel Planning, Seasonal Travel, Accessible Tourism, Adventure Sports, Budget Travel, Luxury Experiences, Alpinismus, Tourism Economy, International Relations, Traffic & Transport
 
-4. **History & Heritage**: Medieval History, Industrial Heritage, Military History, Archaeological Sites, Historic Buildings, Political History, Social Movements, Immigration & Migration, Economic Development, Technological Innovation, Religious History, Family Histories, Preservation Efforts
+4. **Nature & Outdoors**: Mountain Landscapes, Water Bodies, Forests & Woodlands, Wildlife & Flora (including Waschbär, Alpine Animals), Climate & Weather, Environmental Conservation, Outdoor Activities, Seasonal Changes, Natural Phenomena, Geological Features, Agriculture & Farming, Sustainable Living, Eco-Tourism, Animal Wildlife
 
-5. **Nature & Outdoors**: Mountain Landscapes, Water Bodies, Forests & Woodlands, Wildlife & Flora, Climate & Weather, Environmental Conservation, Outdoor Activities, Seasonal Changes, Natural Phenomena, Geological Features, Agriculture & Farming, Sustainable Living, Eco-Tourism
+5. **Food & Culinary**: Traditional Cuisine, Regional Specialties, Wine & Viticulture, Local Markets, Restaurants & Dining, Food Festivals, Artisanal Products, Cooking Techniques, Food History, Modern Gastronomy, Seasonal Ingredients, Food Culture & Customs, Beverages & Spirits, Gastronomie, Culinary Specialties
 
-6. **Food & Drink**: Traditional Cuisine, Regional Specialties, Wine & Viticulture, Local Markets, Restaurants & Dining, Food Festivals, Artisanal Products, Cooking Techniques, Food History, Modern Gastronomy, Seasonal Ingredients, Food Culture & Customs, Beverages & Spirits
+6. **Architecture & Gardens**: Garden Design, Historic Buildings, Modern Architecture, Landscape Architecture, Urban Planning, Religious Architecture, Industrial Architecture, Bridge & Infrastructure, Garden Art, Botanical Gardens, Park Design, Architectural Heritage
 
-7. **People & Profiles**: Local Artisans, Cultural Figures, Historical Personalities, Community Leaders, Entrepreneurs, Artists & Creators, Scientists & Researchers, Political Figures, Immigrant Stories, Youth & Education, Elder Wisdom, Professional Profiles, Social Innovators
+7. **People & Profiles**: Local Artisans, Cultural Figures, Historical Personalities, Community Leaders, Entrepreneurs, Artists & Creators, Scientists & Researchers, Political Figures, Immigrant Stories, Youth & Education, Elder Wisdom, Professional Profiles, Social Innovators, Contemporary Actors, Authors & Writers
 
-8. **Curiosities & Discoveries**: Hidden Gems, Unusual Traditions, Scientific Discoveries, Archaeological Finds, Mysterious Places, Quirky Architecture, Local Legends, Surprising Statistics, Forgotten Stories, Modern Mysteries, Cultural Oddities, Unexpected Connections
+8. **History & Heritage**: Medieval History, Industrial Heritage, Military History, Archaeological Sites, Historic Buildings, Political History, Social Movements, Immigration & Migration, Economic Development, Technological Innovation, Religious History, Family Histories, Preservation Efforts
 
-9. **Events & Seasonal**: Annual Festivals, Cultural Celebrations, Seasonal Activities, Holiday Traditions, Temporary Exhibitions, Sporting Events, Markets & Fairs, Religious Observances, Contemporary Events, Recurring Gatherings, Weather-Dependent Activities, Calendar Highlights, Community Gatherings
+9. **Symbols & Motifs**: Cross & Religious Symbols, Animal Symbols, Landscape Motifs, Cultural Icons, National Symbols, Regional Emblems, Artistic Motifs, Traditional Patterns, Heraldic Symbols, Spiritual Symbols
 
-10. **Lifestyle & Society**: Urban Development, Social Trends, Technology & Innovation, Education & Learning, Healthcare & Wellness, Work & Economy, Housing & Living, Transportation Trends, Environmental Awareness, Cultural Integration, Generational Changes, Quality of Life, Future Planning
+10. **Society & Lifestyle**: Urban Development, Social Trends, Technology & Innovation, Education & Learning, Healthcare & Wellness, Work & Economy, Housing & Living, Transportation Trends, Environmental Awareness, Cultural Integration, Generational Changes, Quality of Life, Future Planning, Language & Communication, Social Issues
 
 ### Reader Questions
 

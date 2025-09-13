@@ -52,26 +52,26 @@ class ArticleLabeler
       1. LOCATIONS: List all mentioned locations (countries, Swiss cantons, cities, regions, landmarks). Be specific - if a Swiss city is mentioned, include it.
       
       2. CATEGORIES: Classify the article into relevant categories from the following structure. Select ALL that apply:
-      
-      Geography & Places: Swiss Cantons, Alpine Regions, Urban Centers, Border Areas, Lake Districts, Valley Communities, Mountain Peaks, European Destinations, Cross-Border Regions, Remote Locations, Accessibility & Transportation Hubs, UNESCO World Heritage Sites, Natural Parks & Reserves
-      
-      Culture & Arts: Traditional Crafts, Contemporary Art, Music & Concerts, Theater & Performance, Literature & Poetry, Photography & Visual Media, Cultural Festivals, Folk Traditions, Religious Heritage, Multicultural Communities, Language & Dialects, Design & Architecture, Street Art & Public Installations
-      
-      Travel & Transportation: Train Journeys, Hiking & Walking Routes, Cycling Paths, Public Transportation, Cable Cars & Funiculars, Road Trips, Accommodation & Hotels, Travel Planning, Seasonal Travel, Accessible Tourism, Adventure Sports, Budget Travel, Luxury Experiences
-      
+
+      Geography & Places: Swiss Cantons, Alpine Regions, Urban Centers, Border Areas, Lake Districts, Valley Communities, Mountain Peaks, European Destinations, Cross-Border Regions, Remote Locations, UNESCO World Heritage Sites, Natural Parks & Reserves, Schwyz, Wallis, Graubünden, Zürich, Bern, Tessin, Appenzell, Fribourg, International Locations
+
+      Culture & Arts: Traditional Crafts, Contemporary Art, Music & Concerts, Theater & Performance, Literature & Poetry, Photography & Visual Media, Cultural Festivals, Folk Traditions, Religious Heritage, Multicultural Communities, Language & Dialects, Street Art & Public Installations, Museums, Exhibitions, Weberei & Stickerei, Schwingen, Traditional Handwork
+
+      Travel & Tourism: Train Journeys, Hiking & Walking Routes, Cycling Paths, Public Transportation, Cable Cars & Funiculars, Road Trips, Accommodation & Hotels, Travel Planning, Seasonal Travel, Accessible Tourism, Adventure Sports, Budget Travel, Luxury Experiences, Alpinismus, Tourism Economy, International Relations, Traffic & Transport
+
+      Nature & Outdoors: Mountain Landscapes, Water Bodies, Forests & Woodlands, Wildlife & Flora, Climate & Weather, Environmental Conservation, Outdoor Activities, Seasonal Changes, Natural Phenomena, Geological Features, Agriculture & Farming, Sustainable Living, Eco-Tourism, Waschbär, Alpine Animals, Animal Wildlife
+
+      Food & Culinary: Traditional Cuisine, Regional Specialties, Wine & Viticulture, Local Markets, Restaurants & Dining, Food Festivals, Artisanal Products, Cooking Techniques, Food History, Modern Gastronomy, Seasonal Ingredients, Food Culture & Customs, Beverages & Spirits, Gastronomie, Culinary Specialties
+
+      Architecture & Gardens: Garden Design, Historic Buildings, Modern Architecture, Landscape Architecture, Urban Planning, Religious Architecture, Industrial Architecture, Bridge & Infrastructure, Garden Art, Botanical Gardens, Park Design, Architectural Heritage
+
+      People & Profiles: Local Artisans, Cultural Figures, Historical Personalities, Community Leaders, Entrepreneurs, Artists & Creators, Scientists & Researchers, Political Figures, Immigrant Stories, Youth & Education, Elder Wisdom, Professional Profiles, Social Innovators, Contemporary Actors, Authors & Writers
+
       History & Heritage: Medieval History, Industrial Heritage, Military History, Archaeological Sites, Historic Buildings, Political History, Social Movements, Immigration & Migration, Economic Development, Technological Innovation, Religious History, Family Histories, Preservation Efforts
-      
-      Nature & Outdoors: Mountain Landscapes, Water Bodies, Forests & Woodlands, Wildlife & Flora, Climate & Weather, Environmental Conservation, Outdoor Activities, Seasonal Changes, Natural Phenomena, Geological Features, Agriculture & Farming, Sustainable Living, Eco-Tourism
-      
-      Food & Drink: Traditional Cuisine, Regional Specialties, Wine & Viticulture, Local Markets, Restaurants & Dining, Food Festivals, Artisanal Products, Cooking Techniques, Food History, Modern Gastronomy, Seasonal Ingredients, Food Culture & Customs, Beverages & Spirits
-      
-      People & Profiles: Local Artisans, Cultural Figures, Historical Personalities, Community Leaders, Entrepreneurs, Artists & Creators, Scientists & Researchers, Political Figures, Immigrant Stories, Youth & Education, Elder Wisdom, Professional Profiles, Social Innovators
-      
-      Curiosities & Discoveries: Hidden Gems, Unusual Traditions, Scientific Discoveries, Archaeological Finds, Mysterious Places, Quirky Architecture, Local Legends, Surprising Statistics, Forgotten Stories, Modern Mysteries, Cultural Oddities, Unexpected Connections
-      
-      Events & Seasonal: Annual Festivals, Cultural Celebrations, Seasonal Activities, Holiday Traditions, Temporary Exhibitions, Sporting Events, Markets & Fairs, Religious Observances, Contemporary Events, Recurring Gatherings, Weather-Dependent Activities, Calendar Highlights, Community Gatherings
-      
-      Lifestyle & Society: Urban Development, Social Trends, Technology & Innovation, Education & Learning, Healthcare & Wellness, Work & Economy, Housing & Living, Transportation Trends, Environmental Awareness, Cultural Integration, Generational Changes, Quality of Life, Future Planning
+
+      Symbols & Motifs: Cross & Religious Symbols, Animal Symbols, Landscape Motifs, Cultural Icons, National Symbols, Regional Emblems, Artistic Motifs, Traditional Patterns, Heraldic Symbols, Spiritual Symbols
+
+      Society & Lifestyle: Urban Development, Social Trends, Technology & Innovation, Education & Learning, Healthcare & Wellness, Work & Economy, Housing & Living, Transportation Trends, Environmental Awareness, Cultural Integration, Generational Changes, Quality of Life, Future Planning, Language & Communication, Social Issues
       
       3. KEYWORDS: Extract 5-10 specific keywords that capture the essence of the article (in the original language where appropriate)
       
@@ -86,14 +86,14 @@ class ArticleLabeler
         "categories": {
           "geography_places": ["Swiss Cantons", "Alpine Regions"],
           "culture_arts": ["Traditional Crafts"],
-          "travel_transportation": ["Train Journeys"],
-          "history_heritage": [],
+          "travel_tourism": ["Train Journeys"],
           "nature_outdoors": ["Mountain Landscapes"],
-          "food_drink": [],
+          "food_culinary": [],
+          "architecture_gardens": [],
           "people_profiles": [],
-          "curiosities_discoveries": [],
-          "events_seasonal": [],
-          "lifestyle_society": []
+          "history_heritage": [],
+          "symbols_motifs": [],
+          "society_lifestyle": []
         },
         "keywords": ["keyword1", "keyword2"]
       }
