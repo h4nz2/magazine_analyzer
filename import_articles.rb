@@ -34,19 +34,25 @@ class ArticleImporter
   def import_magazine(magazine_file)
     magazine_code = File.basename(magazine_file, '.yaml')
     
+    # Extract magazine number from code (last 2 digits)
+    # e.g., trnshlvtc01 -> 1, trnshlvtc12 -> 12
+    magazine_number = magazine_code[-2..-1].to_i
+    
     begin
       data = YAML.load_file(magazine_file) if File.exist?(magazine_file)
       
       # Insert or update magazine
       result = @conn.exec_params(
-        "INSERT INTO magazines (code, title) VALUES ($1, $2) 
-         ON CONFLICT (code) DO UPDATE SET title = EXCLUDED.title
+        "INSERT INTO magazines (code, magazine_number, title) VALUES ($1, $2, $3) 
+         ON CONFLICT (code) DO UPDATE SET 
+           magazine_number = EXCLUDED.magazine_number,
+           title = EXCLUDED.title
          RETURNING id",
-        [magazine_code, data&.dig('title') || magazine_code]
+        [magazine_code, magazine_number, data&.dig('title') || magazine_code]
       )
       
       magazine_id = result[0]['id']
-      puts "Imported magazine: #{magazine_code} (ID: #{magazine_id})"
+      puts "Imported magazine: #{magazine_code} (Number: #{magazine_number}, ID: #{magazine_id})"
       
     rescue => e
       puts "Error importing magazine #{magazine_file}: #{e.message}"
@@ -55,6 +61,9 @@ class ArticleImporter
   
   def import_articles_from_directory(articles_dir)
     magazine_code = File.basename(articles_dir).sub('_articles', '')
+    
+    # Extract magazine number from code (last 2 digits)
+    magazine_number = magazine_code[-2..-1].to_i
     
     # Get magazine_id
     result = @conn.exec_params(
@@ -65,8 +74,8 @@ class ArticleImporter
     if result.ntuples == 0
       puts "Magazine #{magazine_code} not found. Creating it..."
       result = @conn.exec_params(
-        "INSERT INTO magazines (code) VALUES ($1) RETURNING id",
-        [magazine_code]
+        "INSERT INTO magazines (code, magazine_number) VALUES ($1, $2) RETURNING id",
+        [magazine_code, magazine_number]
       )
     end
     

@@ -31,6 +31,7 @@ class DatabaseSetup
       CREATE TABLE magazines (
           id SERIAL PRIMARY KEY,
           code VARCHAR(50) UNIQUE NOT NULL,
+          magazine_number INTEGER,
           title VARCHAR(255),
           publication_date DATE,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -92,6 +93,7 @@ class DatabaseSetup
       );
 
       -- Indexes for better search performance
+      CREATE INDEX idx_magazines_number ON magazines(magazine_number);
       CREATE INDEX idx_articles_magazine_id ON articles(magazine_id);
       CREATE INDEX idx_article_pages_article_id ON article_pages(article_id);
       CREATE INDEX idx_article_images_article_id ON article_images(article_id);
