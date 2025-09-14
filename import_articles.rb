@@ -236,24 +236,25 @@ end
 
 # Usage
 if __FILE__ == $0
-  connection_string = ARGV[0]
-  
-  importer = ArticleImporter.new(connection_string)
-  
-  puts "Article Importer"
-  puts "1. Import all articles"
-  puts "2. Clear all data"
-  puts "3. Exit"
-  print "Choose an option: "
-  
-  choice = gets.chomp
-  
-  case choice
-  when '1'
-    importer.import_all
-  when '2'
+  # Check for command line argument
+  if ARGV[0] == 'd' || ARGV[0] == '--delete'
+    # Delete mode
+    importer = ArticleImporter.new
     importer.clear_all_data
+  elsif ARGV[0] == '--help' || ARGV[0] == '-h'
+    # Help message
+    puts "Usage: ruby import_articles.rb [option]"
+    puts ""
+    puts "Options:"
+    puts "  (no argument)    Import all articles to database (default)"
+    puts "  d, --delete      Delete all data from database"
+    puts "  -h, --help       Show this help message"
+    puts ""
+    puts "Requires: DATABASE_URL environment variable"
   else
-    puts "Exiting..."
+    # Default: Import all articles
+    importer = ArticleImporter.new
+    puts "Starting article import..."
+    importer.import_all
   end
 end
