@@ -6,6 +6,7 @@ require 'net/http'
 require 'json'
 require 'uri'
 require 'fileutils'
+require 'dotenv/load'
 
 class ImageDescriber
   def initialize(api_key = nil)
@@ -173,14 +174,32 @@ class ImageDescriber
 end
 
 # Main execution
-if ARGV.empty?
-  puts "Usage: ruby describe_images.rb <articles_directory>"
-  puts "\nExample: ruby describe_images.rb magazines/trnshlvtc01_articles"
-  puts "\nMake sure to set ANTHROPIC_API_KEY environment variable:"
-  puts "export ANTHROPIC_API_KEY=your_api_key_here"
-  exit 1
+def process_all_magazines
+  magazine_dirs = Dir.glob('magazines/*_articles')
+
+  if magazine_dirs.empty?
+    puts "No article directories found in magazines/"
+    puts "Make sure to run split_magazine.rb first"
+    exit 1
+  end
+
+  puts "Found #{magazine_dirs.length} magazine article directories to process"
+
+  describer = ImageDescriber.new
+
+  magazine_dirs.each do |dir|
+    puts "\n" + "="*60
+    describer.process_directory(dir)
+  end
 end
 
-articles_dir = ARGV[0]
-describer = ImageDescriber.new
-describer.process_directory(articles_dir)
+# Check command line arguments
+if ARGV.empty? || ARGV[0] == 'all'
+  # Process all magazines
+  process_all_magazines
+else
+  # Process specific directory
+  articles_dir = ARGV[0]
+  describer = ImageDescriber.new
+  describer.process_directory(articles_dir)
+end

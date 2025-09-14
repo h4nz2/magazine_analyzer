@@ -8,28 +8,18 @@ require 'dotenv/load'
 
 class EmbeddingsGenerator
   # Using Voyage AI (Anthropic's recommended embeddings provider)
-  # Alternative: Can also use OpenAI by setting EMBEDDING_PROVIDER=openai
   VOYAGE_API_URL = 'https://api.voyageai.com/v1/embeddings'
-  OPENAI_API_URL = 'https://api.openai.com/v1/embeddings'
 
   # Model options
   VOYAGE_MODEL = 'voyage-2' # or 'voyage-large-2' for better quality
-  OPENAI_MODEL = 'text-embedding-3-small'
 
   BATCH_SIZE = 100
 
-  def initialize(connection_string = nil, api_key = nil, provider = nil)
+  def initialize(connection_string = nil, api_key = nil)
     @connection_string = connection_string || ENV['DATABASE_URL']
-    @provider = provider || ENV['EMBEDDING_PROVIDER'] || 'voyage' # default to voyage
+    @api_key = api_key || ENV['VOYAGE_API_KEY']
 
-    # Select appropriate API key based on provider
-    if @provider == 'openai'
-      @api_key = api_key || ENV['OPENAI_API_KEY']
-      raise "Please set OPENAI_API_KEY environment variable or pass API key as argument" if @api_key.nil? || @api_key.empty?
-    else # voyage
-      @api_key = api_key || ENV['VOYAGE_API_KEY']
-      raise "Please set VOYAGE_API_KEY environment variable or pass API key as argument" if @api_key.nil? || @api_key.empty?
-    end
+    raise "Please set VOYAGE_API_KEY environment variable or pass API key as argument" if @api_key.nil? || @api_key.empty?
 
     raise "Please provide a DATABASE_URL environment variable or pass connection string" unless @connection_string
 
@@ -203,11 +193,7 @@ class EmbeddingsGenerator
   end
 
   def get_embeddings(texts)
-    if @provider == 'openai'
-      get_openai_embeddings(texts)
-    else
-      get_voyage_embeddings(texts)
-    end
+    get_voyage_embeddings(texts)
   end
 
   def get_voyage_embeddings(texts)
@@ -235,32 +221,7 @@ class EmbeddingsGenerator
     end
   end
 
-  def get_openai_embeddings(texts)
-    uri = URI(OPENAI_API_URL)
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-
-    request = Net::HTTP::Post.new(uri)
-    request['Authorization'] = "Bearer #{@api_key}"
-    request['Content-Type'] = 'application/json'
-
-    request.body = {
-      input: texts,
-      model: OPENAI_MODEL
-    }.to_json
-
-    response = http.request(request)
-
-    if response.code == '200'
-      data = JSON.parse(response.body)
-      data['data'].map { |item| item['embedding'] }
-    else
-      puts "Error generating OpenAI embeddings: #{response.code} - #{response.body}"
-      raise "Failed to generate embeddings"
-    end
-  end
-
-  def store_embedding(article_id, text, embedding)
+def store_embedding(article_id, text, embedding)
     # Convert embedding array to PostgreSQL array format
     embedding_str = "{#{embedding.join(',')}}"
 
@@ -281,9 +242,7 @@ end
 if __FILE__ == $0
   begin
     # Display provider info
-    provider = ENV['EMBEDDING_PROVIDER'] || 'voyage'
-    puts "Using #{provider} for embeddings generation"
-    puts "Set EMBEDDING_PROVIDER=openai to use OpenAI instead" if provider == 'voyage'
+    puts "Using Voyage AI for embeddings generation"
     puts ""
 
     generator = EmbeddingsGenerator.new
@@ -301,9 +260,8 @@ if __FILE__ == $0
   rescue => e
     puts "Error: #{e.message}"
     puts ""
-    puts "Note: This script requires one of the following:"
-    puts "  - VOYAGE_API_KEY environment variable (default, recommended by Anthropic)"
-    puts "  - OPENAI_API_KEY with EMBEDDING_PROVIDER=openai"
+    puts "Note: This script requires:"
+    puts "  - VOYAGE_API_KEY environment variable (recommended by Anthropic)"
     exit 1
   ensure
     generator&.close_connection

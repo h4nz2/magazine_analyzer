@@ -169,7 +169,7 @@ fi
 # API Configuration
 echo
 echo "API Configuration for AI services:"
-echo "The scripts support Claude (default), OpenAI, and Ollama APIs."
+echo "The scripts use Claude API for processing and Voyage AI for embeddings."
 
 if prompt_yes_no "Do you want to configure API keys now" "y"; then
 
@@ -180,31 +180,10 @@ if prompt_yes_no "Do you want to configure API keys now" "y"; then
         fi
     fi
 
-    if prompt_yes_no "Configure OpenAI API key" "n"; then
-        OPENAI_KEY=$(prompt_with_default "OPENAI_API_KEY" "")
-        if [ -n "$OPENAI_KEY" ]; then
-            echo "OPENAI_API_KEY=$OPENAI_KEY" >> .env
-        fi
-    fi
-
-    if prompt_yes_no "Configure Ollama endpoint (for local AI)" "n"; then
-        OLLAMA_URL=$(prompt_with_default "OLLAMA_BASE_URL" "http://localhost:11434")
-        echo "OLLAMA_BASE_URL=$OLLAMA_URL" >> .env
-    fi
-
-    if prompt_yes_no "Configure Voyage AI API key (for embeddings generation)" "n"; then
+    if prompt_yes_no "Configure Voyage AI API key (for embeddings generation)" "y"; then
         VOYAGE_KEY=$(prompt_with_default "VOYAGE_API_KEY" "")
         if [ -n "$VOYAGE_KEY" ]; then
             echo "VOYAGE_API_KEY=$VOYAGE_KEY" >> .env
-        fi
-    fi
-
-    if prompt_yes_no "Configure OpenAI API key for embeddings (alternative to Voyage)" "n"; then
-        if [ -z "$OPENAI_KEY" ]; then
-            OPENAI_KEY=$(prompt_with_default "OPENAI_API_KEY" "")
-            if [ -n "$OPENAI_KEY" ]; then
-                echo "OPENAI_API_KEY=$OPENAI_KEY" >> .env
-            fi
         fi
     fi
 fi
@@ -214,7 +193,8 @@ echo
 # Processing options
 echo -e "${YELLOW}=== Processing Configuration ===${NC}"
 
-LLM_PROVIDER=$(prompt_with_default "Which AI provider to use for labeling and questions (claude/openai/ollama)" "claude")
+# Claude is the only supported provider
+LLM_PROVIDER="claude"
 
 if prompt_yes_no "Run image description step (recommended but optional)" "y"; then
     RUN_IMAGE_DESC=true
@@ -236,7 +216,8 @@ fi
 
 if prompt_yes_no "Generate embeddings for RAG applications (requires database)" "y"; then
     GENERATE_EMBEDDINGS=true
-    EMBEDDING_PROVIDER=$(prompt_with_default "Which embedding provider to use (voyage/openai)" "voyage")
+    # Voyage is the only supported embedding provider
+    EMBEDDING_PROVIDER="voyage"
 else
     GENERATE_EMBEDDINGS=false
 fi
@@ -269,8 +250,8 @@ echo "2. Split magazines into individual articles"
 if [ "$RUN_IMAGE_DESC" = true ]; then
     echo "3. Generate AI descriptions for images"
 fi
-echo "4. Label articles with AI ($LLM_PROVIDER)"
-echo "5. Generate reader questions with AI ($LLM_PROVIDER)"
+echo "4. Label articles with AI (Claude)"
+echo "5. Generate reader questions with AI (Claude)"
 if [ "$SETUP_DB" = true ]; then
     echo "6. Set up database schema"
 fi
@@ -278,7 +259,7 @@ if [ "$IMPORT_DB" = true ]; then
     echo "7. Import articles to database"
 fi
 if [ "$GENERATE_EMBEDDINGS" = true ]; then
-    echo "8. Generate embeddings for RAG applications ($EMBEDDING_PROVIDER)"
+    echo "8. Generate embeddings for RAG applications (Voyage AI)"
 fi
 
 echo
@@ -289,6 +270,17 @@ if ! prompt_yes_no "Proceed with processing" "y"; then
 fi
 
 echo
+
+# Source .env file to make environment variables available
+if [ -f ".env" ]; then
+    # Use a safer method to export environment variables that handles special characters
+    set -a  # Mark all new and modified variables for export
+    source .env
+    set +a  # Turn off automatic export
+    echo -e "${GREEN}Environment variables loaded from .env${NC}"
+else
+    echo -e "${YELLOW}Warning: .env file not found. Some operations may fail.${NC}"
+fi
 
 # Start processing
 echo -e "${GREEN}=== Starting Magazine Processing ===${NC}"
@@ -311,13 +303,13 @@ if [ "$RUN_IMAGE_DESC" = true ]; then
 fi
 
 # Step 4: Label articles
-echo -e "${BLUE}Step 4: Labeling articles with AI ($LLM_PROVIDER)...${NC}"
-ruby label_articles_llm.rb all "$LLM_PROVIDER"
+echo -e "${BLUE}Step 4: Labeling articles with AI (Claude)...${NC}"
+ruby label_articles_llm.rb all
 echo -e "${GREEN}✓ Article labeling completed${NC}"
 
 # Step 5: Generate questions
-echo -e "${BLUE}Step 5: Generating reader questions with AI ($LLM_PROVIDER)...${NC}"
-ruby generate_questions.rb all "$LLM_PROVIDER"
+echo -e "${BLUE}Step 5: Generating reader questions with AI (Claude)...${NC}"
+ruby generate_questions.rb all
 echo -e "${GREEN}✓ Question generation completed${NC}"
 
 # Step 6: Setup database (optional)
@@ -336,12 +328,8 @@ fi
 
 # Step 8: Generate embeddings (optional)
 if [ "$GENERATE_EMBEDDINGS" = true ]; then
-    echo -e "${BLUE}Step 8: Generating embeddings for RAG applications ($EMBEDDING_PROVIDER)...${NC}"
-    if [ "$EMBEDDING_PROVIDER" = "openai" ]; then
-        EMBEDDING_PROVIDER=openai ruby generate_embeddings.rb
-    else
-        ruby generate_embeddings.rb
-    fi
+    echo -e "${BLUE}Step 8: Generating embeddings for RAG applications (Voyage AI)...${NC}"
+    ruby generate_embeddings.rb
     echo -e "${GREEN}✓ Embeddings generation completed${NC}"
 fi
 
@@ -366,7 +354,7 @@ fi
 if [ "$GENERATE_EMBEDDINGS" = true ]; then
     echo "- Generated vector embeddings for RAG/similarity search"
     echo "  - Embeddings stored in article_embeddings table"
-    echo "  - Provider used: $EMBEDDING_PROVIDER"
+    echo "  - Provider used: Voyage AI"
 fi
 
 echo

@@ -88,16 +88,12 @@ ruby import_articles.rb
 Creates vector embeddings for all articles to enable semantic search and RAG (Retrieval-Augmented Generation) applications.
 
 ```bash
-# Using Voyage AI (default, recommended by Anthropic)
+# Using Voyage AI (recommended by Anthropic)
 ruby generate_embeddings.rb
-
-# Alternative: Using OpenAI
-EMBEDDING_PROVIDER=openai ruby generate_embeddings.rb
 ```
 
 This step:
-- Uses Voyage AI's voyage-2 model by default (Anthropic's recommended embeddings provider)
-- Can alternatively use OpenAI's text-embedding-3-small model
+- Uses Voyage AI's voyage-2 model (Anthropic's recommended embeddings provider)
 - Combines article title, content, categories, locations, keywords, and questions into embedding text
 - Stores embeddings in PostgreSQL for similarity search
 - Supports processing individual articles: `ruby generate_embeddings.rb [article_id]`
@@ -158,14 +154,14 @@ If you prefer manual setup:
    gem install dotenv  # for environment variables
    ```
 3. PostgreSQL database
-4. AI API credentials (Claude, OpenAI, or local Ollama)
+4. AI API credentials:
+   - Claude API key (for article processing)
+   - Voyage AI API key (for embeddings)
 5. Environment variables in `.env` file:
    ```
    DATABASE_URL=postgresql://username:password@host:port/database
    ANTHROPIC_API_KEY=your_claude_api_key
-   VOYAGE_API_KEY=your_voyage_api_key  # For embeddings (recommended)
-   OPENAI_API_KEY=your_openai_api_key  # Alternative for embeddings
-   EMBEDDING_PROVIDER=voyage  # or 'openai'
+   VOYAGE_API_KEY=your_voyage_api_key  # For embeddings
    ```
 
 ### Full Processing Workflow
@@ -181,10 +177,10 @@ ruby split_magazine.rb
 # 3. Generate image descriptions
 ruby describe_images.rb
 
-# 4. Classify articles with detailed categories (defaults to 'all' articles with 'claude')
+# 4. Classify articles with detailed categories
 ruby label_articles_llm.rb
 
-# 5. Generate reader questions (defaults to 'all' articles with 'claude')
+# 5. Generate reader questions
 ruby generate_questions.rb
 
 # 6. Setup database (one time only)
@@ -193,12 +189,8 @@ ruby db_setup.rb
 # 7. Import to database
 ruby import_articles.rb
 
-# 8. Generate embeddings for RAG
-# Default: Uses Voyage AI (requires VOYAGE_API_KEY)
+# 8. Generate embeddings for RAG (requires VOYAGE_API_KEY)
 ruby generate_embeddings.rb
-
-# Alternative: Use OpenAI (requires OPENAI_API_KEY)
-EMBEDDING_PROVIDER=openai ruby generate_embeddings.rb
 ```
 
 ### Detailed Category System

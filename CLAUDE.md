@@ -38,18 +38,16 @@ The app consists of several independent scripts that process magazine PDFs throu
    - Output: Updates article YAML files in-place
 
 4. **`label_articles_llm.rb`** - Classifies and labels articles
-   - Uses LLM to analyze article content
+   - Uses Claude API to analyze article content
    - Adds detailed semantic labels and categories (10 main categories, 130+ specific labels)
    - Generates metadata for improved searchability
-   - Supports Claude, OpenAI, and Ollama APIs
    - Input: `magazines/*_articles/*.yaml`
    - Output: Updates article YAML files with labels
 
 5. **`generate_questions.rb`** - Generates potential reader questions
-   - Uses LLM to create general topic-based questions
+   - Uses Claude API to create general topic-based questions
    - Generates 10 questions per article that readers might ask about the topics
    - Helps with content discovery and SEO
-   - Supports Claude, OpenAI, and Ollama APIs
    - Input: `magazines/*_articles/*.yaml`
    - Output: Updates article YAML files with questions
 
@@ -67,11 +65,10 @@ The app consists of several independent scripts that process magazine PDFs throu
    - Output: PostgreSQL database records
 
 8. **`generate_embeddings.rb`** - Generates embeddings for RAG applications
-   - Creates vector embeddings using Voyage AI (Anthropic's recommended provider) or OpenAI
+   - Creates vector embeddings using Voyage AI (Anthropic's recommended provider)
    - Combines title, content, categories, locations, keywords, and questions into embedding text
    - Stores embeddings in PostgreSQL for similarity search
    - Supports batch processing and individual article updates
-   - Configurable provider: Use `EMBEDDING_PROVIDER=voyage` (default) or `EMBEDDING_PROVIDER=openai`
    - Input: Database articles (uses query from `all_articles_complete.pgsql`)
    - Output: `article_embeddings` table with vector embeddings
 
@@ -89,10 +86,10 @@ ruby split_magazine.rb
 # Step 3: Describe images (optional but recommended)
 ruby describe_images.rb
 
-# Step 4: Label articles with AI using detailed categories (defaults to 'all' articles with 'claude')
+# Step 4: Label articles with AI using detailed categories
 ruby label_articles_llm.rb
 
-# Step 5: Generate reader questions (defaults to 'all' articles with 'claude')
+# Step 5: Generate reader questions
 ruby generate_questions.rb
 
 # Step 6: Setup database (only once)
@@ -101,12 +98,8 @@ ruby db_setup.rb
 # Step 7: Import to database
 ruby import_articles.rb
 
-# Step 8: Generate embeddings for RAG
-# Default: Uses Voyage AI (requires VOYAGE_API_KEY)
+# Step 8: Generate embeddings for RAG (requires VOYAGE_API_KEY)
 ruby generate_embeddings.rb
-
-# Alternative: Use OpenAI (requires OPENAI_API_KEY)
-EMBEDDING_PROVIDER=openai ruby generate_embeddings.rb
 ```
 
 ### Directory Structure
